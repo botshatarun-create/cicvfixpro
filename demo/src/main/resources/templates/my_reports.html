@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Reports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .container { max-width: 800px; margin-top: 30px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .bg-pending { background: #fff3cd; color: #856404; }
+        .bg-resolved { background: #d1e7dd; color: #0f5132; }
+        .bg-escalated { background: #f8d7da; color: #842029; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>My Report History</h3>
+            <a href="/home" class="btn btn-outline-dark btn-sm rounded-pill"><i class="fas fa-arrow-left"></i> Back to Map</a>
+        </div>
+
+        <div class="card p-0 overflow-hidden">
+            <table class="table mb-0">
+                <thead class="bg-light">
+                    <tr><th>Issue</th><th>Dept</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${reports}">
+                        <td>
+                            <div class="fw-bold" th:text="${r.type}"></div>
+                            <small class="text-muted" th:text="${r.location}"></small>
+                        </td>
+                        <td th:text="${r.dept}"></td>
+                        <td>
+                            <span th:if="${r.status == 'Pending'}" class="status-badge bg-pending">Pending</span>
+                            <span th:if="${r.status == 'Resolved'}" class="status-badge bg-resolved">Resolved</span>
+                            <span th:if="${r.status.contains('ESCALATED')}" class="status-badge bg-escalated">Escalated</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

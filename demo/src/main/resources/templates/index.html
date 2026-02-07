@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CivicFix - Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        /* EDGE LIGHT THEME (Clean & Professional) */
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Navbar */
+        .navbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 12px 20px; }
+        .brand { font-weight: 800; font-size: 1.4rem; color: #333; text-decoration: none; }
+        .brand span { color: #0d6efd; } /* Blue Accent */
+
+        /* Main Card */
+        .main-container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .form-card { 
+            background: white; border-radius: 16px; border: none; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;
+        }
+
+        /* Search Bar (Separated) */
+        .search-area { padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; }
+        .search-input { 
+            border: 2px solid #f1f5f9; background: #f8fafc; border-radius: 10px; 
+            padding: 10px; flex-grow: 1; outline: none; font-weight: 600;
+        }
+        .search-input:focus { border-color: #0d6efd; background: white; }
+        .btn-search { background: #0d6efd; color: white; border: none; border-radius: 10px; width: 50px; }
+
+        /* Map */
+        #map { height: 320px; width: 100%; z-index: 1; }
+
+        /* Form */
+        .form-body { padding: 25px; }
+        .section-label { 
+            font-size: 0.75rem; font-weight: 800; color: #6c757d; 
+            text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;
+        }
+        .form-control, .form-select { 
+            border: 1px solid #dee2e6; padding: 12px; border-radius: 8px; margin-bottom: 20px;
+        }
+        
+        /* Submit Button */
+        .btn-submit {
+            background: #212529; color: white; width: 100%; padding: 14px; 
+            font-weight: bold; border-radius: 10px; border: none;
+        }
+        .btn-submit:hover { background: #000; }
+
+        /* Language Button */
+        .lang-btn { background: #f8f9fa; border: 1px solid #dee2e6; color: #333; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar d-flex justify-content-between align-items-center">
+        <a href="#" class="brand">CivicFix<span>.AI</span></a>
+        
+        <div class="d-flex gap-2">
+            <a href="/my-reports" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                <i class="fas fa-history me-1"></i> My Reports
+            </a>
+
+            <div class="dropdown">
+                <button class="btn btn-sm lang-btn dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                    🌍 <span id="langLabel">English</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><button class="dropdown-item" onclick="setLang('en')">English</button></li>
+                    <li><button class="dropdown-item" onclick="setLang('te')">తెలుగు</button></li>
+                    <li><button class="dropdown-item" onclick="setLang('hi')">हिन्दी</button></li>
+                </ul>
+            </div>
+            <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="form-card">
+            
+            <div class="search-area">
+                <input type="text" id="pincode" class="search-input" placeholder="Search Pincode (e.g. 500081)">
+                <button class="btn-search" onclick="searchLocation()"><i class="fas fa-search"></i></button>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="form-body">
+                <form action="/report" method="post" enctype="multipart/form-data">
+                    <input type="hidden" id="lat" name="lat" value="0.0">
+                    <input type="hidden" id="lon" name="lon" value="0.0">
+
+                    <div class="section-label" id="lbl-photo">1. Upload Evidence</div>
+                    <input type="file" name="image" class="form-control" accept="image/*" capture="environment" required>
+
+                    <div class="section-label" id="lbl-details">2. Issue Type</div>
+                    <select class="form-select" name="category" id="catSelect" onchange="toggleOther()">
+                        <option value="Auto-Detect">✨ AI Auto-Analysis (Recommended)</option>
+                        <option value="Pothole">🚧 Pothole / Road Damage</option>
+                        <option value="Garbage">🗑️ Garbage / Waste</option>
+                        <option value="Water">💧 Water Leakage</option>
+                        <option value="Electricity">💡 Streetlight Issue</option>
+                        <option value="Other">✏️ Other Issue...</option>
+                    </select>
+
+                    <textarea name="description" id="otherBox" class="form-control" rows="3" style="display:none;" placeholder="Please describe the issue..."></textarea>
+
+                    <button type="submit" class="btn-submit" id="btn-submit">🚀 SUBMIT REPORT</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3 text-muted small">
+            Civic Intelligence Portal • 2026
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // --- MAP SETUP ---
+        var map = L.map('map').setView([17.3850, 78.4867], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        var marker;
+
+        // --- MARKER LOGIC (FIXED) ---
+        function updateMarker(lat, lon) {
+            // Remove old marker if exists
+            if (marker) { map.removeLayer(marker); }
+            
+            // Add new marker
+            marker = L.marker([lat, lon]).addTo(map);
+            
+            // Update hidden inputs
+            document.getElementById('lat').value = lat;
+            document.getElementById('lon').value = lon;
+        }
+
+        // Auto-Locate on Load
+        map.locate({setView: true, maxZoom: 16});
+        map.on('locationfound', function(e) { 
+            updateMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Click to set marker
+        map.on('click', function(e) {
+            updateMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Search Function
+        async function searchLocation() {
+            var pin = document.getElementById('pincode').value;
+            if(pin.length < 3) return;
+            
+            // Adding 'India' improves accuracy
+            var url = `https://nominatim.openstreetmap.org/search?format=json&q=${pin}, India`;
+            
+            try {
+                let res = await fetch(url);
+                let data = await res.json();
+                
+                if(data.length > 0) {
+                    var lat = data[0].lat;
+                    var lon = data[0].lon;
+                    
+                    map.setView([lat, lon], 15);
+                    updateMarker(lat, lon);
+                } else { 
+                    alert("Location not found! Try searching a nearby area."); 
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // --- TOGGLE OTHER BOX ---
+        function toggleOther() {
+            var val = document.getElementById("catSelect").value;
+            document.getElementById("otherBox").style.display = (val === "Other") ? "block" : "none";
+        }
+
+        // --- LANGUAGE SWITCHER ---
+        const text = {
+            'en': { photo: "1. Upload Evidence", details: "2. Issue Type", btn: "🚀 SUBMIT REPORT", label: "English" },
+            'te': { photo: "1. సాక్ష్యం అప్‌లోడ్", details: "2. సమస్య రకం", btn: "🚀 నివేదించండి", label: "తెలుగు" },
+            'hi': { photo: "1. सबूत अपलोड करें", details: "2. समस्या श्रेणी", btn: "🚀 रिपोर्ट भेजें", label: "हिंदी" }
+        };
+        function setLang(l) {
+            document.getElementById('lbl-photo').innerText = text[l].photo;
+            document.getElementById('lbl-details').innerText = text[l].details;
+            document.getElementById('btn-submit').innerText = text[l].btn;
+            document.getElementById('langLabel').innerText = text[l].label;
+        }
+    </script>
+</body>
+</html>
