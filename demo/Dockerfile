@@ -1,25 +1,19 @@
-# Multi-stage build for Spring Boot application
-# Stage 1: Build
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9-eclipse-temurin-21
 
 WORKDIR /app
 
-# Copy all project files
 COPY . .
 
-# Build the application
-RUN mvn clean package -DskipTests -q
+RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# Copy the JAR from builder
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=0 /app/target/*.jar app.jar
 
-# Expose port 9091 (your configured port)
-EXPOSE 9091
+EXPOSE 8080
 
-# Run the application
+ENV JAVA_OPTS="-Dserver.port=8080"
+
 CMD ["java", "-jar", "app.jar"]
