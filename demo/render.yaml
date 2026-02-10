@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: civicfix-demo
+    env: docker
+    dockerfilePath: ./Dockerfile
+    buildCommand: docker build -t civicfix:latest .
+    startCommand: java -jar app.jar
+    envVars:
+      - key: SERVER_PORT
+        value: "9091"
+    plan: free
