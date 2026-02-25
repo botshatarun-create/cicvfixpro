@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: civicfixpro
+    env: java
+    runtime: java
+    buildCommand: "./mvnw clean package -DskipTests -Xmx300m"
+    startCommand: "java -jar target/demo-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: PORT
+        value: 10000
