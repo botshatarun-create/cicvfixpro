@@ -1,0 +1,21 @@
+{
+    "name": "Java & Spring Boot",
+    "image": "mcr.microsoft.com/devcontainers/java:1-17-bullseye",
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "17",
+            "jdkDistro": "ms"
+        }
+    },
+    "forwardPorts": [9091],
+    "portsAttributes": {
+        "9091": {
+            "label": "Spring Boot App",
+            "onAutoForward": "openBrowser",
+            "requireLocalPort": true,
+            "visibility": "public" 
+        }
+    },
+    "postCreateCommand": "chmod +x ./mvnw",
+    "postAttachCommand": "./mvnw spring-boot:run"
+}
