@@ -9,5 +9,5 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 COPY --from=builder /build/target/demo-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
+EXPOSE 9091
 CMD ["java", "-jar", "app.jar"]
