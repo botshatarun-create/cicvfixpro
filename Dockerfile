@@ -1,10 +1,11 @@
-FROM maven:3.9-eclipse-temurin-21 as builder
+FROM maven:3.9-eclipse-temurin-17 as builder
 
 WORKDIR /build
 COPY . .
-RUN mvn clean package -DskipTests
+RUN chmod +x ./mvnw
+RUN ./mvnw clean package -DskipTests
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 COPY --from=builder /build/target/demo-*.jar app.jar
